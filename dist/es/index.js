@@ -52,21 +52,20 @@ var Backend = function () {
   }, {
     key: 'loadFile',
     value: function loadFile(lng, ns, callback) {
-      var path = void 0;
-
-      // STATIC pathes due to React Native packager do NOT support dynamic ressources
-      // See: https://github.com/facebook/react-native/issues/2481, http://facebook.github.io/react-native/docs/image.html#static-resources
-      if (lng == "en" && ns == "app") {
-        path = "../../../../asset/locale/en/app.json";
-      } else if (lng == "de" && ns == "app") {
-        path = "../../../../asset/locale/de/app.json";
-      } else {
-        // Fallback
-        path = "../../../../asset/locale/en/app.json";
-      }
-
       try {
-        content = require(path);
+        var content = void 0;
+
+        // STATIC pathes due to React Native packager do NOT support dynamic ressources
+        // See: https://github.com/facebook/react-native/issues/2481, http://facebook.github.io/react-native/docs/image.html#static-resources
+        if (lng == "en" && ns == "app") {
+          content = require("../../../../asset/locale/en/app.json");
+        } else if (lng == "de" && ns == "app") {
+          content = require("../../../../asset/locale/de/app.json");
+        } else {
+          // Fallback
+          content = require("../../../../asset/locale/en/app.json");
+        }
+
         callback(null, content);
       } catch (error) {
         callback(error, null);
