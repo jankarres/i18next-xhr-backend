@@ -1,5 +1,4 @@
 import * as utils from './utils';
-import ajax from './ajax'
 
 function getDefaults() {
   return {
@@ -7,8 +6,7 @@ function getDefaults() {
     addPath: 'locales/add/{{lng}}/{{ns}}',
     allowMultiLoading: false,
     parse: JSON.parse,
-    crossDomain: false,
-    ajax: ajax
+    crossDomain: false
   };
 }
 
@@ -27,39 +25,36 @@ class Backend {
   readMulti(languages, namespaces, callback) {
     var loadPath = this.options.loadPath;
     if (typeof this.options.loadPath === 'function') {
-	    loadPath = this.options.loadPath(languages, namespaces);
+      loadPath = this.options.loadPath(languages, namespaces);
     }
 
-    let url = this.services.interpolator.interpolate(loadPath, { lng: languages.join('+'), ns: namespaces.join('+') });
-
-    this.loadUrl(url, callback);
+    throw new Error("React Native i18n XHR backend do not support readMulti option!");
   }
 
   read(language, namespace, callback) {
-    var loadPath = this.options.loadPath;
-    if (typeof this.options.loadPath === 'function') {
-	    loadPath = this.options.loadPath([language], [namespace]);
-    }
-
-    let url = this.services.interpolator.interpolate(loadPath, { lng: language, ns: namespace });
-
-    this.loadUrl(url, callback);
+    // Read file with static config
+    this.loadFile(lng, ns, callback);
   }
 
-  loadUrl(url, callback) {
-    this.options.ajax(url, this.options, (data, xhr) => {
-      if (xhr.status >= 500 && xhr.status < 600) return callback('failed loading ' + url, true /* retry */);
-      if (xhr.status >= 400 && xhr.status < 500) return callback('failed loading ' + url, false /* no retry */);
+  loadFile(lng, ns, callback) {
+    let path;
 
-      let ret, err;
-      try {
-        ret = this.options.parse(data, url);
-      } catch (e) {
-        err = 'failed parsing ' + url + ' to json';
-      }
-      if (err) return callback(err, false);
-      callback(null, ret);
-    });
+    // STATIC pathes due to React Native packager do NOT support dynamic ressources
+    // See: https://github.com/facebook/react-native/issues/2481, http://facebook.github.io/react-native/docs/image.html#static-resources
+    if (lng == "en" && ns == "app") {
+      path = "../../../../asset/locale/en/app.json";
+    } else if (lng == "de" && ns == "app") {
+      path = "../../../../asset/locale/de/app.json";
+    } else { // Fallback
+      path = "../../../../asset/locale/en/app.json";
+    }
+
+    try {
+      content = require(path);
+      callback(null, content);
+    } catch (error) {
+      callback(error, null);
+    }
   }
 
   create(languages, namespace, key, fallbackValue) {
@@ -67,15 +62,6 @@ class Backend {
 
     let payload = {};
     payload[key] = fallbackValue || '';
-
-    languages.forEach(lng => {
-      let url = this.services.interpolator.interpolate(this.options.addPath, { lng: lng, ns: namespace });
-
-      this.options.ajax(url, this.options, function(data, xhr) {
-        //const statusCode = xhr.status.toString();
-        // TODO: if statusCode === 4xx do log
-      }, payload);
-    });
   }
 }
 
