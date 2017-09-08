@@ -47,7 +47,7 @@ var Backend = function () {
     key: 'read',
     value: function read(language, namespace, callback) {
       // Read file with static config
-      this.loadFile(lng, ns, callback);
+      this.loadFile(language, namespace, callback);
     }
   }, {
     key: 'loadFile',

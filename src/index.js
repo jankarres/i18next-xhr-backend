@@ -33,7 +33,7 @@ class Backend {
 
   read(language, namespace, callback) {
     // Read file with static config
-    this.loadFile(lng, ns, callback);
+    this.loadFile(language, namespace, callback);
   }
 
   loadFile(lng, ns, callback) {
